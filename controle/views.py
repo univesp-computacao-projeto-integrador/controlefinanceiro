@@ -59,10 +59,10 @@ def cadastrar_usuario(request):
             password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=password)
             login(request, user)
-            return redirect('home')
+            return redirect('login')
     else:
         form = UserCreationForm()
-    return render(request, 'controle/login.html', {'form': form})
+    return render(request, 'controle/cadastrar_usuario.html', {'form': form})
 
 
 def cadastrar_conta(request):
