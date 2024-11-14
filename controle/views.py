@@ -19,16 +19,30 @@ def home(request):
             despesas = Transacao.objects.filter(conta=conta, categoria__tipo='DSP').aggregate(Sum('valor'))['valor__sum'] or 0
             conta.saldo = receitas - despesas  # Saldo da conta 
 
+        # Obter saldo global atual
+        saldo_atual = 0
+        for conta in contas:
+            for transacao in Transacao.objects.filter(conta=conta):
+                if transacao.tipo == 'REC':
+                    saldo_atual += transacao.valor
+                else:
+                    saldo_atual -= transacao.valor
+
+        """
         saldo_atual = sum([
             transacao.valor if transacao.tipo == 'REC' else - transacao.valor            
             for conta in contas
             for transacao in Transacao.objects.filter(conta=conta)
         ])
+        """
         
+        receitas_mes = 0
+        despesas_mes = 0
+        for conta in contas:
+            receitas_mes += Transacao.objects.filter(conta=conta, categoria__tipo='REC').aggregate(Sum('valor'))['valor__sum'] or 0
 
-        receitas_mes = Transacao.objects.filter(conta=conta, categoria__tipo='REC').aggregate(Sum('valor'))['valor__sum'] or 0
+            despesas_mes += Transacao.objects.filter(conta=conta, categoria__tipo='DSP').aggregate(Sum('valor'))['valor__sum'] or 0
 
-        despesas_mes = Transacao.objects.filter(conta=conta, categoria__tipo='DSP').aggregate(Sum('valor'))['valor__sum'] or 0
 
         transacoes = Transacao.objects.filter(conta__usuario=request.user)
         print(transacoes)
